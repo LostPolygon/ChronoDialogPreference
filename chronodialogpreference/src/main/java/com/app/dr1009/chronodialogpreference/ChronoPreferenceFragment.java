@@ -33,7 +33,7 @@ public abstract class ChronoPreferenceFragment extends PreferenceFragmentCompat 
 
         if (dialogFragment != null) {
             dialogFragment.setTargetFragment(this, 0);
-            dialogFragment.show(getFragmentManager(), DIALOG_FRAGMENT_TAG);
+            dialogFragment.show(getParentFragmentManager(), DIALOG_FRAGMENT_TAG);
         } else {
             super.onDisplayPreferenceDialog(preference);
         }
