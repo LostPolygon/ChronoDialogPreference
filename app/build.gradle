@@ -28,12 +28,12 @@ dependencies {
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    def androidx = "1.1.0"
+    def androidx = "1.5.1"
     implementation "androidx.appcompat:appcompat:$androidx"
     implementation "androidx.preference:preference:$androidx"
-    implementation "com.google.android.material:material:1.0.0"
+    implementation "com.google.android.material:material:1.6.1"
 
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
