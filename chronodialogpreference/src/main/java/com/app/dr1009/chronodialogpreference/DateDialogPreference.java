@@ -15,47 +15,25 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.DialogPreference;
 
-public class DateDialogPreference extends DialogPreference {
-    private static final String DEFAULT_DATE = "1970-1-1";
+public class DateDialogPreference extends ChronoDialogPreference {
+    private static final String DEFAULT_DATE = "1970-01-01";
+    private String mMaxDate;
+    private String mMinDate;
 
-    private final String mMaxDate;
-    private final String mMinDate;
-    private final String mCustomFormat;
-    private final SimpleDateFormat mCustomSimpleDateFormat;
-    private Calendar mCalendar = Calendar.getInstance();
-
-    public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public DateDialogPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.Dialog_Preference_DatePicker, defStyleAttr, defStyleRes);
-
-        mMinDate = a.getString(R.styleable.Dialog_Preference_DatePicker_minDate);
-        mMaxDate = a.getString(R.styleable.Dialog_Preference_DatePicker_maxDate);
-        mCustomFormat = a.getString(R.styleable.Dialog_Preference_DatePicker_customFormat);
-        if (mCustomFormat != null && !mCustomFormat.isEmpty()) {
-            mCustomSimpleDateFormat = new SimpleDateFormat(mCustomFormat, Locale.getDefault());
-        } else {
-            mCustomSimpleDateFormat = null;
-        }
-
-        a.recycle();
     }
 
     public DateDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
+        super(context, attrs, defStyleAttr);
     }
 
     public DateDialogPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, androidx.preference.R.attr.dialogPreferenceStyle);
+        super(context, attrs);
     }
 
     public DateDialogPreference(Context context) {
-        this(context, null);
-    }
-
-    public Calendar getDate() {
-        return mCalendar;
+        super(context);
     }
 
     public String getMinDate() {
@@ -66,78 +44,34 @@ public class DateDialogPreference extends DialogPreference {
         return mMaxDate;
     }
 
-    public String getCustomFormat() {
-        return mCustomFormat;
-    }
+    @Override
+    protected TypedArray getStyledAttributes(Context context, AttributeSet attrs) {
+        TypedArray styledAttributes = context.obtainStyledAttributes(
+            attrs, R.styleable.Dialog_Preference_DatePicker, 0, 0
+        );
 
-    public String getSerializedValue() {
-        return ChronoUtil.DATE_FORMATTER.format(getDate().getTime());
-    }
-
-    public void setSerializedValue(@NonNull final String serializedDate) {
-        try {
-            mCalendar = ChronoUtil.dateToCalendar(ChronoUtil.DATE_FORMATTER.parse(serializedDate));
-        } catch (ParseException e) {
-            throw new AssertionError("Date format is always known and parsable", e);
-        }
-
-        final boolean wasBlocking = shouldDisableDependents();
-
-        persistString(serializedDate);
-
-        final boolean isBlocking = shouldDisableDependents();
-        if (isBlocking != wasBlocking) {
-            notifyDependencyChange(isBlocking);
-        }
-
-        setSummary(getSummary());
+        mMinDate = styledAttributes.getString(R.styleable.Dialog_Preference_DatePicker_minDate);
+        mMaxDate = styledAttributes.getString(R.styleable.Dialog_Preference_DatePicker_maxDate);
+        return styledAttributes;
     }
 
     @Override
-    public CharSequence getSummary() {
-        if (mCustomSimpleDateFormat != null)
-            return mCustomSimpleDateFormat.format(getDate().getTime());
-
-        return DateUtils.formatDateTime(getContext(), getDate().getTimeInMillis(), DateUtils.FORMAT_SHOW_DATE);
+    protected String getCustomSummaryFormat(TypedArray styledAttributes) {
+        return styledAttributes.getString(R.styleable.Dialog_Preference_DatePicker_customSummaryFormat);
     }
 
     @Override
-    protected Object onGetDefaultValue(TypedArray a, int index) {
-        return a.getString(index);
+    protected int getDateUtilsFormat() {
+        return DateUtils.FORMAT_SHOW_DATE;
     }
 
     @Override
-    protected void onSetInitialValue(@Nullable Object defaultValue) {
-        if (defaultValue == null) {
-            setSerializedValue(getPersistedString(DEFAULT_DATE));
-        } else {
-            setSerializedValue((String) defaultValue);
-        }
+    protected SimpleDateFormat getCalendarFormatter() {
+        return ChronoUtil.DATE_FORMATTER;
     }
 
     @Override
-    protected Parcelable onSaveInstanceState() {
-        final Parcelable superState = super.onSaveInstanceState();
-        if (isPersistent()) {
-            // No need to save instance state since it's persistent
-            return superState;
-        }
-
-        final SavedState myState = new SavedState(superState);
-        myState.text = getSerializedValue();
-        return myState;
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        if (state == null || !state.getClass().equals(SavedState.class)) {
-            // Didn't save state for us in onSaveInstanceState
-            super.onRestoreInstanceState(state);
-            return;
-        }
-
-        SavedState myState = (SavedState) state;
-        super.onRestoreInstanceState(myState.getSuperState());
-        setSerializedValue(myState.text);
+    protected String getDefaultSerializedValue() {
+        return DEFAULT_DATE;
     }
 }

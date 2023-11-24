@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="Dialog_Preference_ChronoPicker">
-        <attr name="customFormat" format="string" />
+        <attr name="customSummaryFormat" format="string" />
     </declare-styleable>
 
     <declare-styleable name="Dialog_Preference_TimePicker">
         <attr name="force12HourModePicker" format="boolean" />
         <attr name="force24HourModePicker" format="boolean" />
-        <attr name="customFormat" />
+        <attr name="customSummaryFormat" />
     </declare-styleable>
 
     <declare-styleable name="Dialog_Preference_DatePicker">
         <attr name="minDate" format="string" />
         <attr name="maxDate" format="string" />
-        <attr name="customFormat" />
+        <attr name="customSummaryFormat" />
     </declare-styleable>
 </resources>

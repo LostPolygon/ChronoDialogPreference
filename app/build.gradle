@@ -5,7 +5,7 @@ android {
     defaultConfig {
         applicationId "com.app.dr1009.chronodialogpreferencedemo"
         minSdk 21
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -16,18 +16,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    namespace 'com.app.dr1009.chronodialogpreferencedemo'
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':chronodialogpreference')
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    def androidx = "1.5.1"
-    implementation "androidx.appcompat:appcompat:$androidx"
-    implementation "androidx.preference:preference:$androidx"
-    implementation "com.google.android.material:material:1.6.1"
+    implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation "androidx.preference:preference:1.2.1"
+    implementation "com.google.android.material:material:1.10.0"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
