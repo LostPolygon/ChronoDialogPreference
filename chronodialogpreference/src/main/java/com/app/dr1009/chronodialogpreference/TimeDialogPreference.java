@@ -3,111 +3,76 @@ package com.app.dr1009.chronodialogpreference;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Parcelable;
+import android.text.format.DateUtils;
 import android.util.AttributeSet;
-import android.widget.TimePicker;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.DialogPreference;
 
-public class TimeDialogPreference extends DialogPreference {
-
+public class TimeDialogPreference extends ChronoDialogPreference {
     private static final String DEFAULT_TIME = "00:00";
+    private boolean mIsForce12HourModePicker;
+    private boolean mIsForce24HourModePicker;
 
-    private final boolean mIs24Hour;
-    private TimePicker mTimePicker;
-    private int mHour = 0;
-    private int mMinute = 0;
-
-    public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public TimeDialogPreference(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-
-        TypedArray a = context.obtainStyledAttributes(attrs,
-                R.styleable.Dialog_Preference_TimePicker, 0, 0);
-
-        mIs24Hour = a.getBoolean(R.styleable.Dialog_Preference_TimePicker_is24HourMode, false);
-
-        a.recycle();
     }
 
     public TimeDialogPreference(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context, attrs, defStyleAttr, 0);
+        super(context, attrs, defStyleAttr);
     }
 
     public TimeDialogPreference(Context context, AttributeSet attrs) {
-        this(context, attrs, androidx.preference.R.attr.dialogPreferenceStyle);
+        super(context, attrs);
     }
 
     public TimeDialogPreference(Context context) {
-        this(context, null);
+        super(context);
+    }
+
+    public boolean isForce12HourPicker() {
+        return mIsForce12HourModePicker;
+    }
+
+    public boolean isForce24HourPicker() {
+        return mIsForce24HourModePicker;
     }
 
     @Override
-    public CharSequence getSummary() {
-        return ChronoUtil.get24TimeText(mIs24Hour, mHour, mMinute);
-    }
+    protected TypedArray getStyledAttributes(Context context, AttributeSet attrs) {
+        TypedArray styledAttributes = context.obtainStyledAttributes(
+            attrs, R.styleable.Dialog_Preference_TimePicker, 0, 0
+        );
 
-    public boolean is24Hour() {
-        return mIs24Hour;
-    }
+        mIsForce12HourModePicker = styledAttributes.getBoolean(R.styleable.Dialog_Preference_TimePicker_force12HourModePicker, false);
+        mIsForce24HourModePicker = styledAttributes.getBoolean(R.styleable.Dialog_Preference_TimePicker_force24HourModePicker, false);
 
-    public String getText() {
-        return ChronoUtil.getTimeText(mHour, mMinute);
-    }
-
-    public void setText(@NonNull final String text) {
-        String[] divided = ChronoUtil.getTimeFromText(text);
-        mHour = Integer.parseInt(divided[0]);
-        mMinute = Integer.parseInt(divided[1]);
-
-        final boolean wasBlocking = shouldDisableDependents();
-
-        persistString(text);
-
-        final boolean isBlocking = shouldDisableDependents();
-        if (isBlocking != wasBlocking) {
-            notifyDependencyChange(isBlocking);
-        }
-
-        setSummary(getSummary());
+        return styledAttributes;
     }
 
     @Override
-    protected Object onGetDefaultValue(TypedArray a, int index) {
-        return a.getString(index);
+    protected String getCustomSummaryFormat(TypedArray styledAttributes) {
+        return styledAttributes.getString(R.styleable.Dialog_Preference_TimePicker_customSummaryFormat);
     }
 
     @Override
-    protected void onSetInitialValue(Object defaultValue) {
-        if (defaultValue == null) {
-            setText(getPersistedString(DEFAULT_TIME));
-        } else {
-            setText((String) defaultValue);
-        }
+    protected int getDateUtilsFormat() {
+        return DateUtils.FORMAT_SHOW_TIME;
     }
 
     @Override
-    protected Parcelable onSaveInstanceState() {
-        final Parcelable superState = super.onSaveInstanceState();
-        if (isPersistent()) {
-            // No need to save instance state since it's persistent
-            return superState;
-        }
-
-        final SavedState myState = new SavedState(superState);
-        myState.text = ChronoUtil.getTimeText(mHour, mMinute);
-        return myState;
+    protected SimpleDateFormat getCalendarFormatter() {
+        return ChronoUtil.TIME_FORMATTER;
     }
 
     @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        if (state == null || !state.getClass().equals(SavedState.class)) {
-            // Didn't save state for us in onSaveInstanceState
-            super.onRestoreInstanceState(state);
-            return;
-        }
-
-        SavedState myState = (SavedState) state;
-        super.onRestoreInstanceState(myState.getSuperState());
-        setText(myState.text);
+    protected String getDefaultSerializedValue() {
+        return DEFAULT_TIME;
     }
 }
